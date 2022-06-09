@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     This script creates files, folders as well as all the custom scripts possibly needed when upgrading to Windows 11 as a Feature Update
 
@@ -27,7 +27,8 @@
 
 .LINK
     https://www.imab.dk/remove-built-in-teams-app-and-chat-icon-in-windows-11-during-a-feature-update-via-setupconfig-ini-and-setupcomplete-cmd
-    https://www.imab.dk/monitor-your-windows-11-feature-updates-with-custom-action-scripts-and-notifications-send-to-microsoft-teams/
+    https://www.imab.dk/monitor-your-windows-11-feature-updates-with-custom-action-scripts-and-notifications-send-to-microsoft-teams
+    https://www.imab.dk/escrow-bitlocker-recovery-keys-to-azure-ad-during-feature-update-to-windows-11
 #>
 
 # Global variables
@@ -95,9 +96,10 @@ $targetWindowsBuild = "21H2"
 $registryPath = "HKLM:\SOFTWARE\$companyName\WaaS\$targetWindowsBuild"
 $runDateTime = Get-Date -Format g
 
+# Escrow BitLocker recovery keys to Azure AD
+$bitLockerRecoveryKeystoAAD = $true
 # Teams message card variables
 $sendStatusTeams = $true
-$bitLockerRecoveryKeystoAAD = $true
 $webhookUri = "<INSERT WEBHOOKE URI>"
 $computerName = (Get-WmiObject -Class Win32_ComputerSystem).Name
 $computerMake = (Get-WmiObject -Class Win32_BIOS).Manufacturer
