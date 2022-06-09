@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     This script creates files, folders as well as all the custom scripts possibly needed when upgrading to Windows 11 as a Feature Update
 
@@ -16,6 +16,14 @@
     Author: Martin Bengtsson
     Blog: www.imab.dk
     Twitter: @mwbengtsson
+
+    Version history:
+
+    1.0   -   Script created
+    2.0   -   Added option to send notifications to a Teams channel
+                - Use the option $sendStatusTeams = $true
+    3.0   -   Added option to escrow BitLocker recovery keys to Azure AD
+                - Use the option $bitLockerRecoveryKeystoAAD = $true
 
 .LINK
     https://www.imab.dk/remove-built-in-teams-app-and-chat-icon-in-windows-11-during-a-feature-update-via-setupconfig-ini-and-setupcomplete-cmd
@@ -89,6 +97,7 @@ $runDateTime = Get-Date -Format g
 
 # Teams message card variables
 $sendStatusTeams = $true
+$bitLockerRecoveryKeystoAAD = $true
 $webhookUri = "<INSERT WEBHOOKE URI>"
 $computerName = (Get-WmiObject -Class Win32_ComputerSystem).Name
 $computerMake = (Get-WmiObject -Class Win32_BIOS).Manufacturer
@@ -151,11 +160,14 @@ try {
     if (Test-Path -Path $chatIconPath) {
         New-ItemProperty -Path $chatIconPath -Name "ChatIcon" -Value 2 -PropertyType "DWORD" -Force
     }
+
     # Escrow BitLocker recovery keys to Azure AD
+    if ($bitLockerRecoveryKeystoAAD -eq $true) {
     $BitLockerVolume = Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue
-    if (-NOT[string]::IsNullOrEmpty($BitLockerVolume)) {
-        $KeyProtector = $BitLockerVolume.KeyProtector | Where-Object { $_.KeyProtectorType -eq "RecoveryPassword" }
-        BackupToAAD-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $KeyProtector.KeyProtectorId -ErrorAction SilentlyContinue
+        if (-NOT[string]::IsNullOrEmpty($BitLockerVolume)) {
+            $KeyProtector = $BitLockerVolume.KeyProtector | Where-Object { $_.KeyProtectorType -eq "RecoveryPassword" }
+            BackupToAAD-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $KeyProtector.KeyProtectorId -ErrorAction SilentlyContinue
+        }
     }
     # Write success to registry
     New-ItemProperty -Path $registryPath -Name "SetupCompletecmd" -Value 0 -PropertyType String -Force
